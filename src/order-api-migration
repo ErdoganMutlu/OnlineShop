@@ -1,0 +1,16 @@
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["Orders/Api.Migrations/Api.Migrations.csproj", "Orders/Api.Migrations/"]
+COPY ["Orders/Api.Migrations.Order/Api.Migrations.Order.csproj", "Orders/Api.Migrations.Order/"]
+RUN dotnet restore "Orders/Api.Migrations/Api.Migrations.csproj"
+COPY . .
+WORKDIR "/src/Orders/Api.Migrations"
+RUN dotnet build "Api.Migrations.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Api.Migrations.csproj" -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Api.Migrations.dll"]

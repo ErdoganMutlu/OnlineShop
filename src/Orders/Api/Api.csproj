@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AutoMapper" Version="10.1.1" />
+        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.0-preview.4.22251.1" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Common\Api.Dtos\Api.Dtos.csproj" />
+      <ProjectReference Include="..\Api.Managers\Api.Managers.csproj" />
+      <ProjectReference Include="..\Api.ObjectModels\Api.ObjectModels.csproj" />
+      <ProjectReference Include="..\Api.RabbitMqServiceClients\Api.RabbitMqServiceClients.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Middlewares" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,164 @@
+version: '1'
+services:
+    db:
+        image: postgres
+        restart: always
+        container_name: online-db
+        environment:
+          POSTGRES_PASSWORD: Secret!Passw0rd
+          POSTGRES_USER: postgres
+        healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U postgres"]
+          interval: 10s
+          timeout: 5s
+          retries: 5
+        ports:
+         - 5432:5432
+        networks:
+         - mynetwork
+
+    rabbitmq:
+        image: rabbitmq:3.8-management-alpine
+        restart: always
+        container_name: online-rabbitmq
+        hostname: rabbitmq
+        environment:
+          - rabbitMQHost=rabbitmq
+          - RABBITMQ_DEFAULT_USER=guest
+          - RABBITMQ_DEFAULT_PASS=guest
+        healthcheck:
+          test: rabbitmq-diagnostics -q ping
+          interval: 30s
+          timeout: 30s
+          retries: 3
+        ports:
+          - 5672:5672
+          - 15672:15672
+        networks:
+        - mynetwork
+
+    rabbitmq-api:
+        image: rabbitmq-api
+        restart: always
+        build:
+          context: ./src
+          dockerfile: rabbitmq-api
+        ports:
+          - "5053:80"
+        depends_on: 
+          db:
+            condition: service_healthy
+          rabbitmq:
+            condition: service_healthy
+        environment:
+          Api__BaseUrl: http://localhost:5053
+          Services__ProductApiBaseUrl: http://product-api
+          Services__CustomerApiBaseUrl: http://customer-api
+          Services__OrderApiBaseUrl: http://order-api
+          RabbitMq__Username: guest
+          RabbitMq__Password: guest
+          RabbitMq__Host: rabbitmq
+          RabbitMq__Port: 5672
+        networks:
+          - mynetwork
+
+    product-api-migration:
+        image: product-api-migration
+        build:
+          context: ./src
+          dockerfile: product-api-migration
+        ports:
+          - "6050:80"
+        depends_on: 
+          db:
+            condition: service_healthy
+        networks:
+          - mynetwork
+
+    product-api:
+        image: product-api
+        restart: always
+        build:
+          context: ./src
+          dockerfile: product-api
+        ports:
+          - "5050:80"
+        depends_on: 
+          db:
+            condition: service_healthy
+        environment:
+          ConnectionStrings__ProductDbContextConnStr: Host=db;User Id=postgres;Password=Secret!Passw0rd;Database=online_product;Port=5432
+          Api__BaseUrl: http://localhost:5050
+        networks:
+          - mynetwork
+
+    customer-api-migration:
+        image: customer-api-migration
+        build:
+          context: ./src
+          dockerfile: customer-api-migration
+        ports:
+          - "6051:80"
+        depends_on: 
+          db:
+            condition: service_healthy
+        networks:
+          - mynetwork
+
+    customer-api:
+        image: customer-api
+        restart: always
+        build:
+          context: ./src
+          dockerfile: customer-api
+        ports:
+          - "5051:80"
+        depends_on: 
+          db:
+            condition: service_healthy
+        environment:
+          ConnectionStrings__CustomerDbContextConnStr: Host=db;User Id=postgres;Password=Secret!Passw0rd;Database=online_customer;Port=5432
+          Api__BaseUrl: http://localhost:5051
+        networks:
+          - mynetwork
+
+    order-api-migration:
+        image: order-api-migration
+        build:
+          context: ./src
+          dockerfile: order-api-migration
+        ports:
+          - "6052:80"
+        depends_on: 
+          db:
+            condition: service_healthy
+        networks:
+          - mynetwork
+
+    order-api:
+        image: order-api
+        restart: always
+        build:
+          context: ./src
+          dockerfile: order-api
+        ports:
+          - "5052:80"
+        depends_on: 
+          db:
+            condition: service_healthy
+          rabbitmq:
+            condition: service_healthy
+        environment:
+          ConnectionStrings__OrderDbContextConnStr: Host=db;User Id=postgres;Password=Secret!Passw0rd;Database=online_order;Port=5432
+          Api__BaseUrl: http://localhost:5052
+          Services__RabbitMqApiBaseUrl: http://rabbitmq-api
+        networks:
+          - mynetwork
+
+volumes:
+  db:
+    driver: local
+
+networks:
+  mynetwork:
+     driver: bridge

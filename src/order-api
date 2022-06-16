@@ -1,0 +1,21 @@
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["Orders/Api/Api.csproj", "Orders/Api/"]
+COPY ["Common/Api.Dtos/Api.Dtos.csproj", "Common/Api.Dtos/"]
+COPY ["Orders/Api.Managers/Api.Managers.csproj", "Orders/Api.Managers/"]
+COPY ["Orders/Api.ObjectModels/Api.ObjectModels.csproj", "Orders/Api.ObjectModels/"]
+COPY ["Common/Api.ObjectModels.Base/Api.ObjectModels.Base.csproj", "Common/Api.ObjectModels.Base/"]
+COPY ["Common/Api.Tools/Api.Tools.csproj", "Common/Api.Tools/"]
+COPY ["Orders/Api.RabbitMqServiceClients/Api.RabbitMqServiceClients.csproj", "Orders/Api.RabbitMqServiceClients/"]
+RUN dotnet restore "Orders/Api/Api.csproj"
+COPY . .
+WORKDIR "/src/Orders/Api"
+RUN dotnet build "Api.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Api.csproj" -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Api.dll"]

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FluentMigrator" Version="3.2.17" />
+      <PackageReference Include="FluentMigrator.Runner" Version="3.2.17" />
+      <PackageReference Include="FluentMigrator.Runner.Postgres" Version="3.2.17" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0-preview.5.21301.5" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="6.0.0-preview.5.21301.5" />
+      <PackageReference Include="Npgsql" Version="6.0.0-preview4" />
+      <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0-preview.5.21301.5" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Api.Migrations.Product\Api.Migrations.Product.csproj" />
+    </ItemGroup>
+
+</Project>
