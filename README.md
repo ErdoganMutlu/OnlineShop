@@ -7,7 +7,7 @@ OnlineShop is a small exercise to show microservice architecture, how microservi
 
 # How to Run
 - Install docker on your machine
-- open powershell and run docker-compose.yml
+- open powershell and run docker-compose up
 - I coded on mac it is working on windows as well.
 
 
